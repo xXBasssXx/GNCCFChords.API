@@ -1,0 +1,6 @@
+@GNCCFChords.API_HostAddress = http://localhost:5244
+
+GET {{GNCCFChords.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
