@@ -1,13 +1,14 @@
 ﻿using GNCCFChords.API.Common;
 using GNCCFChords.API.DataAccess;
 using GNCCFChords.API.Model.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace GNCCFChords.API.BusinessLogic
 {
     public interface IChordsLogic
     {
         public Task AddChordsToSong(ChordPartDTO chordPart);
-        public Task<List<ChordPartDTO>> GetChordsBySong(Guid songId);
+        public Task<ChordPartResponse> GetChordsBySong(Guid songId);
     }
 
     public class ChordsLogic: IChordsLogic
@@ -36,20 +37,39 @@ namespace GNCCFChords.API.BusinessLogic
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<ChordPartDTO>> GetChordsBySong(Guid songId)
+        public async Task<ChordPartResponse> GetChordsBySong(Guid songId)
         {
-            var chords = _context.ChordParts;
+            var chordParts = await _context.ChordParts
+                .Include(x => x.Song)
+                .FirstOrDefaultAsync(x => x.SongId == songId);
 
-            if(!songId.Equals(Guid.Empty))
+            string chords = string.Empty;
+
+            if(!string.IsNullOrEmpty(chordParts.IntroChords))
             {
-                chords.Where(chords => chords.SongId == songId);
+                chords += $"INTRO: {Environment.NewLine}" +
+                          $"{chordParts.IntroChords} {Environment.NewLine}{Environment.NewLine}";
+                          
+            }
+            if (!string.IsNullOrEmpty(chordParts.PreChorusChords))
+            {
+                chords += $"PRE-CHORUS: {Environment.NewLine}" +
+                          $"{chordParts.PreChorusChords} {Environment.NewLine}{Environment.NewLine}";
+            }
+            if(!string.IsNullOrEmpty(chordParts.ChorusChords))
+            {
+                chords += $"CHORUS: {Environment.NewLine}" +
+                          $"{chordParts.ChorusChords}{Environment.NewLine}";
+            }
+            if(!string.IsNullOrEmpty(chordParts.BridgeChords))
+            {
+                chords += $"BRIDGE: {Environment.NewLine}" +
+                          $"{chordParts.BridgeChords}{Environment.NewLine}";
             }
 
-            var mapped = chords
-                .Select(chord => new ChordPartDTO(chord.ChordPartId, chord.SongId, chord.IntroChords, chord.PreChorusChords, chord.ChorusChords, chord.BridgeChords, chord.ChordKey))
-                .ToList();
+            var response = new ChordPartResponse(chordParts.ChordPartId, chordParts.Song.SongName, chordParts.ChordKey.ToString(), chords);
 
-            return mapped;
+            return response;
         }
     }
 }

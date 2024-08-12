@@ -33,7 +33,7 @@ namespace GNCCFChords.API.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> GetChordsBySong(Guid songId)
+        public async Task<IActionResult> GetChordsBySong([FromQuery] Guid songId)
         {
             try
             {

@@ -48,15 +48,16 @@ namespace GNCCFChords.API.BusinessLogic
         {
             var songs = _context.Songs
                 .OrderBy(x => x.SongName)
+                .Include(x => x.ChordParts)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
                 songs = songs.Where(x => x.SongName.Contains(search))
                     .AsQueryable();
-            }
+            }   
 
-            var mapped = songs.Select(x => new SongDTO(x.SongId, x.SongName, x.Artist)).ToList();
+            var mapped = songs.Select(x => new SongDTO(x.SongId, x.SongName, x.Artist, x.ChordParts.FirstOrDefault().ChordKey.ToString())).ToList();
 
             return mapped;
         }
