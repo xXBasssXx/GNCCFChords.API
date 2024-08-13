@@ -4,6 +4,7 @@
     {
         public Guid ChordPartId { get; set; }
         public string IntroChords { get; set; }
+        public string Verse { get; set; }
         public string? PreChorusChords { get; set; }
         public string ChorusChords { get; set; }
         public string? BridgeChords { get; set; }

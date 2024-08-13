@@ -26,6 +26,7 @@ namespace GNCCFChords.API.BusinessLogic
             {
                 ChordPartId = Guid.NewGuid(),
                 SongId = chordPart.SongId,
+                Verse = chordPart.Verse,
                 IntroChords = chordPart.IntroChords,
                 PreChorusChords = chordPart.PreChorusChords,
                 ChorusChords = chordPart.ChorusChords,
@@ -51,6 +52,12 @@ namespace GNCCFChords.API.BusinessLogic
                           $"{chordParts.IntroChords} {Environment.NewLine}{Environment.NewLine}";
                           
             }
+            if (!string.IsNullOrEmpty(chordParts.Verse))
+            {
+                chords += $"VERSE: {Environment.NewLine}" +
+                          $"{chordParts.Verse} {Environment.NewLine}{Environment.NewLine}";
+
+            }
             if (!string.IsNullOrEmpty(chordParts.PreChorusChords))
             {
                 chords += $"PRE-CHORUS: {Environment.NewLine}" +
@@ -59,7 +66,7 @@ namespace GNCCFChords.API.BusinessLogic
             if(!string.IsNullOrEmpty(chordParts.ChorusChords))
             {
                 chords += $"CHORUS: {Environment.NewLine}" +
-                          $"{chordParts.ChorusChords}{Environment.NewLine}";
+                          $"{chordParts.ChorusChords}{Environment.NewLine}{Environment.NewLine}";
             }
             if(!string.IsNullOrEmpty(chordParts.BridgeChords))
             {
