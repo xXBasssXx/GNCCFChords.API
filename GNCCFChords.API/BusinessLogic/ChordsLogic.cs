@@ -9,6 +9,8 @@ namespace GNCCFChords.API.BusinessLogic
     {
         public Task AddChordsToSong(ChordPartDTO chordPart);
         public Task<ChordPartResponse> GetChordsBySong(Guid songId);
+        public Task<string> GetMorningServiceLineUp();
+        public Task<string> GetYouthServiceLineUp();
     }
 
     public class ChordsLogic: IChordsLogic
@@ -44,39 +46,84 @@ namespace GNCCFChords.API.BusinessLogic
                 .Include(x => x.Song)
                 .FirstOrDefaultAsync(x => x.SongId == songId);
 
-            string chords = string.Empty;
-
-            if(!string.IsNullOrEmpty(chordParts.IntroChords))
-            {
-                chords += $"INTRO: {Environment.NewLine}" +
-                          $"{chordParts.IntroChords} {Environment.NewLine}{Environment.NewLine}";
-                          
-            }
-            if (!string.IsNullOrEmpty(chordParts.Verse))
-            {
-                chords += $"VERSE: {Environment.NewLine}" +
-                          $"{chordParts.Verse} {Environment.NewLine}{Environment.NewLine}";
-
-            }
-            if (!string.IsNullOrEmpty(chordParts.PreChorusChords))
-            {
-                chords += $"PRE-CHORUS: {Environment.NewLine}" +
-                          $"{chordParts.PreChorusChords} {Environment.NewLine}{Environment.NewLine}";
-            }
-            if(!string.IsNullOrEmpty(chordParts.ChorusChords))
-            {
-                chords += $"CHORUS: {Environment.NewLine}" +
-                          $"{chordParts.ChorusChords}{Environment.NewLine}{Environment.NewLine}";
-            }
-            if(!string.IsNullOrEmpty(chordParts.BridgeChords))
-            {
-                chords += $"BRIDGE: {Environment.NewLine}" +
-                          $"{chordParts.BridgeChords}{Environment.NewLine}";
-            }
+            string chords = ConcatenateChordParts(chordParts.IntroChords, chordParts.Verse, chordParts.PreChorusChords, chordParts.ChorusChords, chordParts.BridgeChords);
 
             var response = new ChordPartResponse(chordParts.ChordPartId, chordParts.Song.SongName, chordParts.ChordKey.ToString(), chords);
 
             return response;
+        }
+        public async Task<string> GetMorningServiceLineUp()
+        {
+            var songs = await _context.Songs
+                .Include(x => x.ChordParts)
+                .Where(x => x.ForMorningService)
+                .OrderBy(x => x.Timestamp)
+                .ToListAsync();
+
+            string lineUp = string.Empty;
+
+            foreach (var song in songs)
+            {
+                var chordParts = song.ChordParts.FirstOrDefault();
+                string chords = ConcatenateChordParts(chordParts.IntroChords, chordParts.Verse, chordParts.PreChorusChords, chordParts.ChorusChords, chordParts.BridgeChords);
+
+                lineUp += $"{song.SongName} - {chordParts.ChordKey}{Environment.NewLine}{Environment.NewLine}{chords}";
+            }
+
+            return lineUp;
+        }
+        public async Task<string> GetYouthServiceLineUp()
+        {
+            var songs = await _context.Songs
+                .Include(x => x.ChordParts)
+                .Where(x => x.ForYouthService)
+                .ToListAsync();
+
+            string lineUp = string.Empty;
+
+            foreach (var song in songs)
+            {
+                var chordParts = song.ChordParts.FirstOrDefault();
+                string chords = ConcatenateChordParts(chordParts.IntroChords, chordParts.Verse, chordParts.PreChorusChords, chordParts.ChorusChords, chordParts.BridgeChords);
+
+                lineUp += $"{song.SongName} - {chordParts.ChordKey}{Environment.NewLine}{chords}";
+            }
+
+            return lineUp;
+        }
+        private string ConcatenateChordParts(string intro, string verse, string preChorus, string chorus, string bridge)
+        {
+            string chords = string.Empty;
+
+            if (!string.IsNullOrEmpty(intro))
+            {
+                chords += $"INTRO: {Environment.NewLine}" +
+                          $"{intro} {Environment.NewLine}{Environment.NewLine}";
+
+            }
+            if (!string.IsNullOrEmpty(verse))
+            {
+                chords += $"VERSE: {Environment.NewLine}" +
+                          $"{verse} {Environment.NewLine}{Environment.NewLine}";
+
+            }
+            if (!string.IsNullOrEmpty(preChorus))
+            {
+                chords += $"PRE-CHORUS: {Environment.NewLine}" +
+                          $"{preChorus} {Environment.NewLine}{Environment.NewLine}";
+            }
+            if (!string.IsNullOrEmpty(chorus))
+            {
+                chords += $"CHORUS: {Environment.NewLine}" +
+                          $"{chorus}{Environment.NewLine}{Environment.NewLine}";
+            }
+            if (!string.IsNullOrEmpty(bridge))
+            {
+                chords += $"BRIDGE: {Environment.NewLine}" +
+                          $"{bridge}{Environment.NewLine}";
+            }
+
+            return chords;
         }
     }
 }

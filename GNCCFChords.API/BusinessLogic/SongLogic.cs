@@ -11,6 +11,8 @@ namespace GNCCFChords.API.BusinessLogic
     {
         public Task<Guid> AddSong(SongDTO song);
         public Task<List<SongDTO>> GetSongs(string? search);
+        public Task UpdateMorningLineUp(Guid songId);
+        public Task UpdateYouthLineUp(Guid songId);
     }
     public class SongLogic: ISongLogic
     {
@@ -60,6 +62,34 @@ namespace GNCCFChords.API.BusinessLogic
             var mapped = songs.Select(x => new SongDTO(x.SongId, x.SongName, x.Artist, x.ChordParts.FirstOrDefault().ChordKey.ToString())).ToList();
 
             return mapped;
+        }
+        public async Task UpdateMorningLineUp(Guid songId)
+        {
+            var song = await _context.Songs
+                .FindAsync(songId);
+
+            if (song is null)
+                return;
+
+            song.ForMorningService = !song.ForMorningService;
+            song.Timestamp = DateTime.Now;
+
+            _context.Songs.Update(song);
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateYouthLineUp(Guid songId)
+        {
+            var song = await _context.Songs
+                .FindAsync(songId);
+
+            if (song is null)
+                return;
+
+            song.ForYouthService = !song.ForYouthService;
+            song.Timestamp = DateTime.Now;
+
+            _context.Songs.Update(song);
+            await _context.SaveChangesAsync();
         }
     }
 }

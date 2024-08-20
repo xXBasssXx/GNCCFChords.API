@@ -45,5 +45,34 @@ namespace GNCCFChords.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet]
+        [Route("Morning")]
+        public async Task<IActionResult> GetMorningServiceLineUp()
+        {
+            try
+            {
+                var result = await _chordsLogic.GetMorningServiceLineUp();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Youth")]
+        public async Task<IActionResult> GetYouthServiceLineUp()
+        {
+            try
+            {
+                var result = await _chordsLogic.GetYouthServiceLineUp();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
